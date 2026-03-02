@@ -2,13 +2,12 @@ const axios = require("axios");
 
 async function fetchPinterestMedia(url) {
   if (!url || typeof url !== "string") {
-    throw new Error("Link Pinterest harus diisi");
+    throw new Error("Pinterest link is required");
   }
 
   try {
-    console.log("[PINTEREST] Menggunakan Ryzumi API untuk:", url);
+    console.log("[PINTEREST] Using Ryzumi API for:", url);
 
-    // 1. Menyusun URL API (Metode GET sesuai dokumentasi Ryzumi)
     const apiUrl = `https://api.ryzumi.net/api/downloader/pinterest?url=${encodeURIComponent(url)}`;
 
     const { data } = await axios.get(apiUrl, {
@@ -17,29 +16,23 @@ async function fetchPinterestMedia(url) {
       }
     });
 
-    // 2. Validasi Respons
     if (!data || (!data.image && !data.video)) {
-      throw new Error("Gagal mendapatkan data media dari Pinterest.");
+      throw new Error("Failed to retrieve media data from Pinterest.");
     }
 
     const downloads = [];
-    
-    // Mengambil thumbnail (Prioritaskan gambar, jika tidak ada pakai poster video)
+
     let thumbnail = data.image?.url || data.video?.poster || null;
 
-    // 3. Mapping Data berdasarkan tipe media (Gambar atau Video)
     if (data.isImage && data.image?.url) {
-      // Jika media berupa Foto/Gambar
       downloads.push({
         quality: "HD",
         format: "jpg",
         url: data.image.url
       });
     } else if (!data.isImage && data.video) {
-      // Jika media berupa Video
-      // (Asumsi: API Ryzumi meletakkan link video di dalam data.video.url)
       const videoUrl = data.video.url || data.video.downloadUrl || data.url;
-      
+
       if (videoUrl) {
         downloads.push({
           quality: data.video.quality || "HD",
@@ -50,20 +43,19 @@ async function fetchPinterestMedia(url) {
     }
 
     if (downloads.length === 0) {
-        throw new Error("Sistem berhasil menghubungi API, tetapi link unduhan kosong.");
+      throw new Error("Successfully connected to API but download link is empty.");
     }
 
-    // 4. Return Data sesuai format UI Zeronaut
     return {
       title: data.title || "Pinterest Media",
       thumbnail: thumbnail,
-      downloads: downloads // Sesuai dengan App.jsx Pinterest yang menggunakan properti 'downloads'
+      downloads: downloads
     };
 
   } catch (error) {
     const errorMsg = error.response ? JSON.stringify(error.response.data) : error.message;
     console.error("[PINTEREST ERROR]:", errorMsg);
-    throw new Error("Gagal memproses link Pinterest. Pastikan link valid dan bukan private board.");
+    throw new Error("Failed to process Pinterest link. Make sure the link is valid and not from a private board.");
   }
 }
 
