@@ -308,7 +308,7 @@ export default function App() {
               className="gradient-text-main text-4xl sm:text-5xl md:text-7xl font-black tracking-tight leading-none select-none"
               style={{ letterSpacing: '-0.02em' }}
             >
-              ZERONAUT
+              VINCENTSENSEI
             </h1>
             <div className="gradient-text-sub text-sm sm:text-base font-black tracking-[0.6em] uppercase mt-1">
               DOWNLOADER
@@ -813,28 +813,28 @@ export default function App() {
             }}
           />
           <p className="text-[10px] font-mono tracking-[0.25em] text-gray-600 mb-1 uppercase">
-            © 2026 ZeroNaut Downloader · All Rights Reserved
+            © 2026 VincentSensei Downloader · All Rights Reserved
           </p>
           <p className="text-[9px] font-mono text-gray-700 tracking-widest uppercase">
-            Powered by ZeroNaut Engine v6
+            Powered by VINCENTSENSEI Engine v6
           </p>
         </motion.footer>
       </div>
 
       <motion.a
-        href="https://sociabuzz.com/zeronaut/tribe"
-        target="_blank"
-        rel="noopener noreferrer"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1 }}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
-        className="donate-btn fixed bottom-5 right-4 sm:right-6 z-50 flex items-center gap-2 text-black font-black text-[11px] px-4 py-2.5 rounded-full cursor-pointer tracking-wider uppercase"
-      >
-        <Heart size={14} className="fill-black animate-pulse" />
-        DONATE
-      </motion.a>
+  href="https://web.facebook.com/vincent.09123455"
+  target="_blank"
+  rel="noopener noreferrer"
+  initial={{ opacity: 0, scale: 0.8 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ delay: 1 }}
+  whileHover={{ scale: 1.08 }}
+  whileTap={{ scale: 0.95 }}
+  className="donate-btn fixed bottom-5 right-4 sm:right-6 z-50 flex items-center gap-2 text-black font-black text-[11px] px-4 py-2.5 rounded-full cursor-pointer tracking-wider uppercase"
+>
+  <Facebook size={14} className="fill-black" />
+  CONTACT ON FACEBOOK
+</motion.a>
     </div>
   );
 }
