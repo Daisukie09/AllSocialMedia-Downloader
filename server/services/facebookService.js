@@ -1,18 +1,16 @@
 const axios = require("axios");
 
 async function fetchFacebook(url) {
-  // 1. Validasi URL Basic
   if (!url || typeof url !== "string") {
-    throw new Error("Link Facebook harus diisi");
+    throw new Error("Facebook link is required");
   }
   if (!url.includes("facebook.com") && !url.includes("fb.watch")) {
-    throw new Error("URL tidak valid. Harap masukkan link Facebook yang benar.");
+    throw new Error("Invalid URL. Please enter a valid Facebook link.");
   }
 
   try {
-    console.log("[FB] Menggunakan Puruboy API untuk:", url);
+    console.log("[FB] Using Puruboy API for:", url);
 
-    // 2. Request ke API Puruboy menggunakan metode POST
     const { data } = await axios.post(
       "https://puruboy-api.vercel.app/api/downloader/fbdl",
       { url: url },
@@ -25,54 +23,49 @@ async function fetchFacebook(url) {
       }
     );
 
-    // 3. Cek Error/Validasi Data dari Puruboy
     if (!data.success || !data.result) {
-      throw new Error("Gagal mengambil data. Pastikan video bersifat Publik.");
+      throw new Error("Failed to fetch data. Make sure the video is set to Public.");
     }
 
     const result = data.result;
     const downloadLinks = [];
 
-    // 4. Parsing Kualitas (HD & SD)
-    // Mengecek apakah link video HD tersedia
     if (result.video_hd) {
       downloadLinks.push({
         url: result.video_hd,
-        type: 'video',
-        label: 'Download Video (HD)' // 'label' digunakan di kode lama, kita pertahankan
+        type: "video",
+        label: "Download Video (HD)"
       });
     }
 
-    // Mengecek apakah link video SD tersedia
     if (result.video_sd) {
       downloadLinks.push({
         url: result.video_sd,
-        type: 'video',
-        label: 'Download Video (SD)'
+        type: "video",
+        label: "Download Video (SD)"
       });
     }
 
     if (downloadLinks.length === 0) {
-      throw new Error("Link download tidak ditemukan atau video tidak didukung.");
+      throw new Error("Download link not found or video is not supported.");
     }
 
-    // --- UPDATE THUMBNAIL ---
-    // Menggunakan thumbnail dari API jika ada, jika tidak gunakan logo default
-    const thumbnailUrl = result.thumbnail || "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/1024px-Facebook_Logo_%282019%29.png";
+    const thumbnailUrl =
+      result.thumbnail ||
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/1024px-Facebook_Logo_%282019%29.png";
 
-    // 5. Mengembalikan data dengan format yang sesuai dengan Frontend Zeronaut
     return {
       title: "Facebook Video",
       author: data.author || "Facebook User",
       thumbnail: thumbnailUrl,
-      medias: downloadLinks // Pastikan menggunakan 'medias' sesuai dengan kode lama Anda
+      medias: downloadLinks
     };
 
   } catch (error) {
     const errorMsg = error.response ? JSON.stringify(error.response.data) : error.message;
     console.error("[FB Service Error]:", errorMsg);
-    throw new Error("Gagal mengambil data dari server. Pastikan link valid dan video bersifat publik.");
+    throw new Error("Failed to fetch data from server. Make sure the link is valid and the video is set to public.");
   }
 }
 
-module.exports = { fetchFacebook }; // Pastikan nama fungsi yang diekspor sama dengan yang dipanggil di index.js
+module.exports = { fetchFacebook };
