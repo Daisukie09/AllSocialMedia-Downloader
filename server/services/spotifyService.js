@@ -12,11 +12,11 @@ async function fetchSpotify(url) {
   }
 
   if (!isSpotifyUrl(url)) {
-    throw new Error("URL tidak valid. Harap masukkan link lagu Spotify yang benar.");
+    throw new Error("Invalid URL. Please enter the correct Spotify song link.");
   }
 
   try {
-    console.log("[SPOTIFY] Menggunakan Ryzumi API untuk:", url);
+    console.log("[SPOTIFY] Using Ryzumi API for:", url);
 
     // 1. Menyusun URL API (Metode GET sesuai dokumentasi Ryzumi)
     const apiUrl = `https://api.ryzumi.net/api/downloader/spotify?url=${encodeURIComponent(url)}`;
@@ -29,7 +29,7 @@ async function fetchSpotify(url) {
 
     // 2. Validasi Response dari Ryzumi
     if (!data || !data.success || !data.link) {
-      throw new Error("Gagal mendapatkan link download dari server pusat.");
+      throw new Error("Failed to get download link from central server.");
     }
 
     const metadata = data.metadata || {};
@@ -57,7 +57,7 @@ async function fetchSpotify(url) {
     // Sistem pelacak error
     const errorMsg = error.response ? JSON.stringify(error.response.data) : error.message;
     console.error("[SPOTIFY ERROR]:", errorMsg);
-    throw new Error("Gagal mengekstrak link Spotify. Pastikan link berupa track lagu (bukan playlist).");
+    throw new Error("Failed to extract Spotify link. Make sure the link is a song track (not a playlist).");
   }
 }
 
