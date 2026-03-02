@@ -2,7 +2,7 @@ const axios = require("axios");
 
 async function fetchYouTubeData(url) {
   if (!url || typeof url !== "string") {
-    throw new Error("Link YouTube harus diisi");
+    throw new Error("YouTube link is required");
   }
 
   const formats = [];
@@ -16,9 +16,7 @@ async function fetchYouTubeData(url) {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
   };
 
-  // ==========================================
-  // 1. EKSTRAK VIDEO (MP4)
-  // ==========================================
+  // 1. EXTRACT VIDEO (MP4)
   try {
     const { data: videoData } = await axios.post(
       "https://puruboy-api.vercel.app/api/downloader/youtube",
@@ -26,12 +24,12 @@ async function fetchYouTubeData(url) {
       { headers }
     );
     const resultVideo = videoData.result || videoData.data;
-    
+
     if (resultVideo && resultVideo.downloadUrl) {
       videoTitle = resultVideo.title || videoTitle;
       videoThumbnail = resultVideo.thumbnail || videoThumbnail;
       videoAuthor = resultVideo.author || videoData.author || videoAuthor;
-      
+
       formats.push({
         type: "video",
         quality: resultVideo.quality || "HD",
@@ -43,20 +41,22 @@ async function fetchYouTubeData(url) {
     console.error(`[VIDEO ERROR]`, err.message);
   }
 
-  // ==========================================
-  // 2. EKSTRAK AUDIO (MP3)
-  // ==========================================
+  // 2. EXTRACT AUDIO (MP3)
   try {
     const { data: audioData } = await axios.post(
       "https://puruboy-api.vercel.app/api/downloader/ytmp3",
       { url: url },
       { headers }
     );
-    
+
     const resultAudio = audioData.result || audioData.data || audioData;
-    
-    // PERBAIKAN: Menambahkan 'download_url' sesuai temuan radar kita
-    const audioLink = resultAudio?.download_url || resultAudio?.downloadUrl || resultAudio?.url || resultAudio?.link || resultAudio?.media;
+
+    const audioLink =
+      resultAudio?.download_url ||
+      resultAudio?.downloadUrl ||
+      resultAudio?.url ||
+      resultAudio?.link ||
+      resultAudio?.media;
 
     if (audioLink) {
       formats.push({
@@ -70,11 +70,9 @@ async function fetchYouTubeData(url) {
     console.error(`[AUDIO ERROR]`, err.message);
   }
 
-  // ==========================================
-  // 3. FINALISASI
-  // ==========================================
+  // 3. FINALIZE
   if (formats.length === 0) {
-    throw new Error("Gagal mengekstrak Video dan Audio. Server pusat mungkin sedang penuh.");
+    throw new Error("Failed to extract Video and Audio. The server might be busy, please try again later.");
   }
 
   return {
