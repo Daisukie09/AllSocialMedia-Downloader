@@ -8,7 +8,7 @@ function isSpotifyUrl(url) {
 
 async function fetchSpotify(url) {
   if (!url || typeof url !== "string") {
-    throw new Error("Link Spotify harus diisi");
+    throw new Error("Spotify link must be filled in");
   }
 
   if (!isSpotifyUrl(url)) {
