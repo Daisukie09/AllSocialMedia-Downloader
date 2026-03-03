@@ -19,7 +19,7 @@ async function fetchSpotify(url) {
     console.log("[SPOTIFY] Using Ryzumi API for:", url);
 
     // 1. Menyusun URL API (Metode GET sesuai dokumentasi Ryzumi)
-    const apiUrl = `https://api.ryzumi.net/api/downloader/spotify?url=${encodeURIComponent(url)}`;
+    const apiUrl = `https://zenithapi-zeta.vercel.app/api/spotify?url=${encodeURIComponent(url)}`;
     
     const { data } = await axios.get(apiUrl, {
       headers: {
