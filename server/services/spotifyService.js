@@ -1,8 +1,8 @@
 const axios = require("axios");
 
-// Fungsi validasi URL Spotify agar user tidak memasukkan link sembarangan
 function isSpotifyUrl(url) {
-  const regex = /^https?:\/\/open\.spotify\.com\/(track|album|playlist|artist)\/[a-zA-Z0-9]+/;
+  const regex =
+    /^https?:\/\/open\.spotify\.com\/(track|album|playlist|artist)\/[a-zA-Z0-9]+/;
   return regex.test(url);
 }
 
@@ -16,48 +16,58 @@ async function fetchSpotify(url) {
   }
 
   try {
-    console.log("[SPOTIFY] Using Ryzumi API for:", url);
+    console.log("[SPOTIFY] Fetching metadata for:", url);
 
-    // 1. Menyusun URL API (Metode GET sesuai dokumentasi Ryzumi)
-    const apiUrl = `https://zenithapi-zeta.vercel.app/api/spotify?url=${encodeURIComponent(url)}`;
-    
-    const { data } = await axios.get(apiUrl, {
+    // ── Step 1: Fetch metadata (action=info or default GET) ──────────────
+    const metaUrl = `https://zenithapi-zeta.vercel.app/api/spotify?url=${encodeURIComponent(url)}`;
+
+    const { data } = await axios.get(metaUrl, {
       headers: {
-        "Accept": "application/json"
-      }
+        Accept: "application/json",
+      },
     });
 
-    // 2. Validasi Response dari Ryzumi
-    if (!data || !data.success || !data.link) {
-      throw new Error("Failed to get download link from central server.");
+    console.log("[SPOTIFY] Raw API response:", JSON.stringify(data));
+
+    // ── Step 2: Validate response using new field names ──────────────────
+    if (!data || !data.status) {
+      throw new Error("API returned an unsuccessful response.");
     }
 
-    const metadata = data.metadata || {};
+    if (!data.download) {
+      throw new Error("Failed to get download link from API.");
+    }
 
-    // 3. Menyusun format balasan agar sesuai dengan yang dibaca oleh UI Zeronaut kamu
+    // ── Step 3: Build download link using the 'download' field ───────────
+    //    The new API already provides a ready-to-use download URL
     const downloadLinks = [
       {
-        url: data.link,         // Link unduhan lagu
+        url: data.download,
         quality: "High Quality",
         extension: "mp3",
-        type: "audio"
-      }
+        type: "audio",
+      },
     ];
 
-    // 4. Return Data
+    // ── Step 4: Return normalized data for the UI ─────────────────────────
     return {
-      title: metadata.title || "Spotify Track",
-      author: metadata.artists || "Unknown Artist",
-      duration: null, // Durasi tidak disediakan oleh API Ryzumi
-      thumbnail: metadata.cover || null, // Menggunakan cover album
-      downloadLinks: downloadLinks, // Array untuk dirender jadi tombol di App.jsx
+      title:         data.title    || "Spotify Track",
+      author:        data.artist   || "Unknown Artist",
+      duration:      data.duration || null,
+      thumbnail:     data.cover    || null,
+      downloadLinks: downloadLinks,
     };
 
   } catch (error) {
-    // Sistem pelacak error
-    const errorMsg = error.response ? JSON.stringify(error.response.data) : error.message;
+    const errorMsg = error.response
+      ? JSON.stringify(error.response.data)
+      : error.message;
+
     console.error("[SPOTIFY ERROR]:", errorMsg);
-    throw new Error("Failed to extract Spotify link. Make sure the link is a song track (not a playlist).");
+
+    throw new Error(
+      "Failed to extract Spotify link. Make sure the link is a song track (not a playlist)."
+    );
   }
 }
 
