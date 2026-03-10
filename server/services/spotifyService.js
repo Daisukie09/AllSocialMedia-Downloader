@@ -10,17 +10,14 @@ async function fetchSpotify(url) {
   if (!url || typeof url !== "string") {
     throw new Error("Spotify link must be filled in");
   }
-
   if (!isSpotifyUrl(url)) {
     throw new Error("Invalid URL. Please enter the correct Spotify song link.");
   }
-
   try {
     console.log("[SPOTIFY] Fetching metadata for:", url);
 
-    // ── Step 1: Fetch metadata (action=info or default GET) ──────────────
-    const metaUrl = `https://zenithapi-zeta.vercel.app/api/spotify?url=${encodeURIComponent(url)}`;
-
+    // ── Step 1: Fetch metadata ───────────────────────────────────────────
+    const metaUrl = `https://spotify.zenithapi.qzz.io/spotify?url=${encodeURIComponent(url)}`;
     const { data } = await axios.get(metaUrl, {
       headers: {
         Accept: "application/json",
@@ -30,19 +27,17 @@ async function fetchSpotify(url) {
     console.log("[SPOTIFY] Raw API response:", JSON.stringify(data));
 
     // ── Step 2: Validate response using new field names ──────────────────
-    if (!data || !data.status) {
+    if (!data || !data.success) {
       throw new Error("API returned an unsuccessful response.");
     }
-
-    if (!data.download) {
+    if (!data.download || !data.download.url) {
       throw new Error("Failed to get download link from API.");
     }
 
-    // ── Step 3: Build download link using the 'download' field ───────────
-    //    The new API already provides a ready-to-use download URL
+    // ── Step 3: Build download link using the 'download.url' field ───────
     const downloadLinks = [
       {
-        url: data.download,
+        url: data.download.url,
         quality: "High Quality",
         extension: "mp3",
         type: "audio",
@@ -51,20 +46,17 @@ async function fetchSpotify(url) {
 
     // ── Step 4: Return normalized data for the UI ─────────────────────────
     return {
-      title:         data.title    || "Spotify Track",
-      author:        data.artist   || "Unknown Artist",
-      duration:      data.duration || null,
-      thumbnail:     data.cover    || null,
+      title:         data.track?.name              || "Spotify Track",
+      author:        data.track?.artists           || "Unknown Artist",
+      duration:      data.track?.duration          || null,
+      thumbnail:     data.track?.albumImage        || null,
       downloadLinks: downloadLinks,
     };
-
   } catch (error) {
     const errorMsg = error.response
       ? JSON.stringify(error.response.data)
       : error.message;
-
     console.error("[SPOTIFY ERROR]:", errorMsg);
-
     throw new Error(
       "Failed to extract Spotify link. Make sure the link is a song track (not a playlist)."
     );
